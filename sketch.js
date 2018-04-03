@@ -31,11 +31,14 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, 2 * windowHeight / 3);
   list = new Drawable_List(createOrderedList(width));
-  createButton('Restart').mousePressed(restart);
+  createButton('Restart').mousePressed(restart).style('border-radius', '12px');
   elementP = createP("Number of Elements (" + list.elements.length + "):");
+  elementP.style('margin', '0px');
+  elementP.style('color', '#dddddd');
   elementSlider = createSlider(2, width, width, 1);
+  elementSlider.style('width', (249 * width / 250) + 'px');
   algorithmButtons = [];
-  createP("Sorting Types:");
+  createP("Sorting Types:").style('margin', '0px').style('color', '#dddddd');
   algorithmButtons.push(createButton('Selection'));
   algorithmButtons.push(createButton('Double Selection'));
   algorithmButtons.push(createButton('Insertion'));
@@ -50,8 +53,18 @@ function setup() {
   algorithmButtons[ODD_EVEN - 1].mousePressed(odd_even_sort);
   algorithmButtons[BOGO - 1].mousePressed(bogo_sort);
   algorithmButtons[BOZO - 1].mousePressed(bozo_sort);
-  speedP = createP("Speed ():")
+  algorithmButtons[SELECTION - 1].style('border-radius', '12px');
+  algorithmButtons[DOUBLE_SELECTION - 1].style('border-radius', '12px');
+  algorithmButtons[INSERTION - 1].style('border-radius', '12px');
+  algorithmButtons[BUBBLE - 1].style('border-radius', '12px');
+  algorithmButtons[ODD_EVEN - 1].style('border-radius', '12px');
+  algorithmButtons[BOGO - 1].style('border-radius', '12px');
+  algorithmButtons[BOZO - 1].style('border-radius', '12px');
+  speedP = createP("Speed ():");
+  speedP.style('margin', '0px');
+  speedP.style('color', '#dddddd');
   speedSlider = createSlider(1, width);
+  speedSlider.style('width', (249 * width / 250) + 'px');
   colorMode(HSB);
   index = 0;
   swaps = 0;
@@ -69,51 +82,45 @@ function draw() {
   background(0);
   list.show();
   speed = speedSlider.value();
-  switch (sort) {
-    case SELECTION:
-      for (let i = 0; i < speed; i++) {
-        if (index < list.elements.length) {
-          sound.amp(1);
-          if (index < list.elements.length - 1) {
-            list.swap(index, minIndex(list.elements, index));
-          }
-          index++;
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        } else {
-          passes = 1;
-          sound.amp(0);
-        }
-      }
-      break;
-    case DOUBLE_SELECTION:
-      for (let i = 0; i < speed; i++)
-        if (index < (list.elements.length + 1) / 2) {
-          sound.amp(1);
-          list.swap(list.elements.length - 1 - index, int(maxIndex(list.elements, index, list.elements.length - index)));
-          list.swap(index, int(minIndex(list.elements, index++)));
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        } else {
-          passes = 1;
-          sound.amp(0);
-        }
-      break;
-    case INSERTION:
-      for (let i = 0; i < speed; i++)
-        if (index < list.elements.length) {
-          sound.amp(1);
-          for (let j = index++; j > 0; j--)
-            if (list.elements[j - 1] > list.elements[j]) {
-              list.swap(j - 1, j);
+  if (!list.sorted() && sort != NONE) {
+    sound.amp(1);
+    switch (sort) {
+      case SELECTION:
+        for (let i = 0; i < speed; i++) {
+          if (index < list.elements.length) {
+            if (index < list.elements.length - 1) {
+              list.swap(index, minIndex(list.elements, index));
             }
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        } else {
-          passes = 1;
-          sound.amp(0);
+            index++;
+            sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+          } else {
+            passes = 1;
+          }
         }
-      break;
-    case ODD_EVEN:
-      if (!list.sorted()) {
-        sound.amp(1);
+        break;
+      case DOUBLE_SELECTION:
+        for (let i = 0; i < speed; i++)
+          if (index < (list.elements.length + 1) / 2) {
+            list.swap(list.elements.length - 1 - index, int(maxIndex(list.elements, index, list.elements.length - index)));
+            list.swap(index, int(minIndex(list.elements, index++)));
+            sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+          } else {
+            passes = 1;
+          }
+        break;
+      case INSERTION:
+        for (let i = 0; i < speed; i++)
+          if (index < list.elements.length) {
+            for (let j = index++; j > 0; j--)
+              if (list.elements[j - 1] > list.elements[j]) {
+                list.swap(j - 1, j);
+              }
+            sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+          } else {
+            passes = 1;
+          }
+        break;
+      case ODD_EVEN:
         for (let i = 0; i < speed; i++) {
           if (index < list.elements.length - 1) {
             if (list.elements[index] > list.elements[index + 1]) {
@@ -136,13 +143,8 @@ function draw() {
           } else index += 2;
           sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
         }
-      } else {
-        sound.amp(0);
-      }
-      break;
-    case BUBBLE:
-      if (!list.sorted()) {
-        sound.amp(1);
+        break;
+      case BUBBLE:
         for (let i = 0; i < speed; i++) {
           if (index < list.elements.length - 1) {
             if (list.elements[index] > list.elements[index + 1]) {
@@ -156,32 +158,28 @@ function draw() {
           } else index++;
           sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
         }
-      } else sound.amp(0);
-      break;
-    case BOGO:
-      for (let i = 0; i < speed; i++) {
-        sound.amp(1);
-        if (!list.sorted()) {
-          list.elements = shuffle(list.elements);
-          index = int(random(list.elements.length));
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        } else {
-          sound.amp(0);
+        break;
+      case BOGO:
+        for (let i = 0; i < speed; i++) {
+          if (!list.sorted()) {
+            list.elements = shuffle(list.elements);
+            index = int(random(list.elements.length));
+            sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+          }
         }
-      }
-      break;
-    case BOZO:
-      for (let i = 0; i < speed; i++) {
-        sound.amp(1);
-        if (!list.sorted()) {
-          index = int(random(list.elements.length));
-          list.swap(index, int(random(list.elements.length)));
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        } else {
-          sound.amp(0);
+        break;
+      case BOZO:
+        for (let i = 0; i < speed; i++) {
+          if (!list.sorted()) {
+            index = int(random(list.elements.length));
+            list.swap(index, int(random(list.elements.length)));
+            sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+          }
         }
-      }
-      break;
+        break;
+    }
+  } else {
+    sound.amp(0);
   }
 }
 
@@ -237,6 +235,7 @@ function selection_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length / 10, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = SELECTION;
 }
 
@@ -245,6 +244,7 @@ function double_selection_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length / 5, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = DOUBLE_SELECTION;
 }
 
@@ -253,6 +253,7 @@ function insertion_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length / 10, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = INSERTION;
 }
 
@@ -261,6 +262,7 @@ function bubble_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = BUBBLE;
 }
 
@@ -269,6 +271,7 @@ function odd_even_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = ODD_EVEN;
 }
 
@@ -277,6 +280,7 @@ function bogo_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, 25, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = BOGO;
 }
 
@@ -285,5 +289,6 @@ function bozo_sort() {
   restart();
   speedSlider.remove();
   speedSlider = createSlider(1, list.elements.length / 10, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = BOZO;
 }
