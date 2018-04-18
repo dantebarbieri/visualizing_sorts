@@ -7,16 +7,17 @@ const BUBBLE = 4;
 const ODD_EVEN = 5;
 const BOGO = 6;
 const BOZO = 7;
+const RADIX = 8;
 //Sound
 const minFreq = 256;
 const maxFreq = 1024;
 //Objects
 let list, sound;
 //Sorting Trackers
-let sort, index, baseIndex, passes, swaps;
+let sort, radix, index, baseIndex, passes, swaps;
 //DOM Elements
 let elementP, elementsSlider, speedP, speedSlider, algorithmButtons
-
+//Speed
 const speedMax = 10;
 let speed = 1;
 
@@ -69,6 +70,7 @@ function setup() {
   index = 0;
   swaps = 0;
   passes = 0;
+  radix = 10;
   sort = NONE;
   // frameRate(1);
 }
@@ -175,6 +177,15 @@ function draw() {
             list.swap(index, int(random(list.elements.length)));
             sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
           }
+        }
+        break;
+      case RADIX:
+        buckets = new Array(radix);
+        for (let i = 0; i < buckets.length; i++) {
+          buckets[i] = [];
+        }
+        for (let i = 0; i < list.elements.length; i++) {
+          buckets[list.elements[i] % radix].push(i);
         }
         break;
     }
@@ -291,4 +302,13 @@ function bozo_sort() {
   speedSlider = createSlider(1, list.elements.length / 10, 1, 1);
   speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
   sort = BOZO;
+}
+
+function radix_sort() {
+  index = 1;
+  restart();
+  speedSlider.remove();
+  speedSlider = createSlider(1, list.elements.length / 10, 1, 1);
+  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
+  sort = RADIX;
 }
