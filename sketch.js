@@ -4,27 +4,33 @@ const SELECTION = 1;
 const DOUBLE_SELECTION = 2;
 const INSERTION = 3;
 const BUBBLE = 4;
-const ODD_EVEN = 5;
-const BOGO = 6;
-const BOZO = 7;
-const RADIX = 8;
+// const ODD_EVEN = 5;
+const BOGO = 5;
+const BOZO = 6;
+const RADIX = 7;
 //Sound
-const minFreq = 256;
-const maxFreq = 1024;
+const minFreq = 440;
+const maxFreq = 880;
 //Objects
 let list, sound;
 //Sorting Trackers
 let sort, radix, index, baseIndex, passes, swaps;
 //DOM Elements
-let elementP, elementsSlider, speedP, speedSlider, algorithmButtons
+let elementP, elementsSlider, speedP, speedSlider, volumeP, volumeSlider, algorithmButtons
 //Speed
 const speedMax = 10;
 let speed = 1;
+//Volume
+const volumeMin = 1;
+const volumeMax = 2;
+let volume = 0.05;
+
+let log2
 
 function preload() {
   sound = new p5.Oscillator();
   sound.setType('sine');
-  sound.freq(240);
+  sound.freq(220);
   sound.amp(0);
   sound.start();
 }
@@ -44,23 +50,28 @@ function setup() {
   algorithmButtons.push(createButton('Double Selection'));
   algorithmButtons.push(createButton('Insertion'));
   algorithmButtons.push(createButton('Bubble'));
-  algorithmButtons.push(createButton('Odd-Even'));
+  // algorithmButtons.push(createButton('Odd-Even'));
   algorithmButtons.push(createButton('Bogo'));
   algorithmButtons.push(createButton('Bozo'));
   algorithmButtons[SELECTION - 1].mousePressed(selection_sort);
   algorithmButtons[DOUBLE_SELECTION - 1].mousePressed(double_selection_sort);
   algorithmButtons[INSERTION - 1].mousePressed(insertion_sort);
   algorithmButtons[BUBBLE - 1].mousePressed(bubble_sort);
-  algorithmButtons[ODD_EVEN - 1].mousePressed(odd_even_sort);
+  // algorithmButtons[ODD_EVEN - 1].mousePressed(odd_even_sort);
   algorithmButtons[BOGO - 1].mousePressed(bogo_sort);
   algorithmButtons[BOZO - 1].mousePressed(bozo_sort);
   algorithmButtons[SELECTION - 1].style('border-radius', '12px');
   algorithmButtons[DOUBLE_SELECTION - 1].style('border-radius', '12px');
   algorithmButtons[INSERTION - 1].style('border-radius', '12px');
   algorithmButtons[BUBBLE - 1].style('border-radius', '12px');
-  algorithmButtons[ODD_EVEN - 1].style('border-radius', '12px');
+  // algorithmButtons[ODD_EVEN - 1].style('border-radius', '12px');
   algorithmButtons[BOGO - 1].style('border-radius', '12px');
   algorithmButtons[BOZO - 1].style('border-radius', '12px');
+  volumeP = createP("Volume ():");
+  volumeP.style('margin', '0px');
+  volumeP.style('color', '#dddddd');
+  volumeSlider = createSlider(volumeMin, volumeMax, volume, 0);
+  volumeSlider.style('width', (249 * width / 250) + 'px');
   speedP = createP("Speed ():");
   speedP.style('margin', '0px');
   speedP.style('color', '#dddddd');
@@ -73,6 +84,8 @@ function setup() {
   radix = 10;
   sort = NONE;
   // frameRate(1);
+  const LOG2 = log(2)
+  log2 = (x) => log(x)/LOG2
 }
 
 function draw() {
@@ -81,11 +94,13 @@ function draw() {
   else
     elementP.html("Number of Elements (" + list.elements.length + "->" + elementSlider.value() + "):");
   speedP.html("Speed (" + speed + "):");
+  volumeP.html("Volume (" + round(map(log2(volume), log2(volumeMin), log2(volumeMax), 0, 100), 2) + "%):");
   background(0);
   list.show();
   speed = speedSlider.value();
+  volume = volumeSlider.value();
   if (!list.sorted() && sort != NONE) {
-    sound.amp(1);
+    sound.amp(map(log2(volume), log2(volumeMin), log2(volumeMax), 0, 0.2));
     switch (sort) {
       case SELECTION:
         for (let i = 0; i < speed; i++) {
@@ -122,30 +137,30 @@ function draw() {
             passes = 1;
           }
         break;
-      case ODD_EVEN:
-        for (let i = 0; i < speed; i++) {
-          if (index < list.elements.length - 1) {
-            if (list.elements[index] > list.elements[index + 1]) {
-              list.swap(index, index + 1);
-            }
-          }
-          if (index >= list.elements.length) {
-            index = 1;
-            passes++;
-          } else index += 2;
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-          if (index < list.elements.length - 1) {
-            if (list.elements[index] > list.elements[index + 1]) {
-              list.swap(index, index + 1);
-            }
-          }
-          if (index >= list.elements.length) {
-            index = 0;
-            passes++;
-          } else index += 2;
-          sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
-        }
-        break;
+      // case ODD_EVEN:
+      //   for (let i = 0; i < speed; i++) {
+      //     if (index < list.elements.length - 1) {
+      //       if (list.elements[index] > list.elements[index + 1]) {
+      //         list.swap(index, index + 1);
+      //       }
+      //     }
+      //     if (index >= list.elements.length) {
+      //       index = 1;
+      //       passes++;
+      //     } else index += 2;
+      //     sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+      //     if (index < list.elements.length - 1) {
+      //       if (list.elements[index] > list.elements[index + 1]) {
+      //         list.swap(index, index + 1);
+      //       }
+      //     }
+      //     if (index >= list.elements.length) {
+      //       index = 0;
+      //       passes++;
+      //     } else index += 2;
+      //     sound.freq(map(index, 0, list.elements.length - 1, minFreq, maxFreq));
+      //   }
+      //   break;
       case BUBBLE:
         for (let i = 0; i < speed; i++) {
           if (index < list.elements.length - 1) {
@@ -277,14 +292,14 @@ function bubble_sort() {
   sort = BUBBLE;
 }
 
-function odd_even_sort() {
-  baseIndex = 0;
-  restart();
-  speedSlider.remove();
-  speedSlider = createSlider(1, list.elements.length, 1, 1);
-  speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
-  sort = ODD_EVEN;
-}
+// function odd_even_sort() {
+//   baseIndex = 0;
+//   restart();
+//   speedSlider.remove();
+//   speedSlider = createSlider(1, list.elements.length, 1, 1);
+//   speedSlider.style('width', min((249 * width / 250), list.elements.length) + 'px');
+//   sort = ODD_EVEN;
+// }
 
 function bogo_sort() {
   baseIndex = 0;
